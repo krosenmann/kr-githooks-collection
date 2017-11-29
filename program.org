@@ -1,0 +1,41 @@
+#+TITLE: Git Hooks Collection
+#+AUTHOR: Roman Zayrullin
+#+EMAIL: krosenmann@gmail.com
+#+STARTUP: showall
+#+LaTeX_ClASS_OPTIONS: [11pt,a4paper,ubuntu]
+#+LaTeX_HEADER:\usepackage[scale=0.75]{geometry}
+#+LaTeX_HEADER:\usepackage[utf-8]{inputrec}
+
+Проверка на брейкпоинты и временные переменные. 
+#+NAME: check_bps
+#+BEGIN_SRC shell 
+#!/bin/bash
+
+pdb_check=$(git grep -i ';Tracer()()\|ipbd.set_trace()\|petuch' -- '*.py')
+
+if [ ${#pdb_check} -gt 0 ]
+then
+        echo -e "\e[31mCOMMIT REJECTED: commit contains code with break points. Please remove before commiting.\e[0m"
+        echo $pdb_check
+        exit 1
+else
+        echo -e "\e[36mCode contains no break points\e[0m"
+fi
+#+end_src
+
+Тестирование джанго-проектов
+#+NAME: commit_after_tests
+#+begin_src shell
+source .venv/bin/activate
+./manage.py test
+RESULT=$?
+if [ $RESULT -ne 0 ]
+then
+    echo -e "\e[31mCOMMIT REJECTED: Test's failed!\e[0m"
+    exit 1
+else
+    echo -e "\e[36mTest Passed\e[0m"
+fi
+
+exit 0
+#+end_src
