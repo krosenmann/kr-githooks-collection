@@ -6,12 +6,14 @@
 #+LaTeX_HEADER:\usepackage[scale=0.75]{geometry}
 #+LaTeX_HEADER:\usepackage[utf-8]{inputrec}
 
-Проверка на брейкпоинты и временные переменные. 
-#+NAME: check_bps
-#+BEGIN_SRC shell 
+Проверка на брейкпоинты и временные переменные. А если точнее, то на
+любые нежелательные куски временного кода, которые могут быть
+отобранны по регулярке, понимаемой git-grep.
+#+NAME: Проверка на наличие нежелательного\временного кода
+#+BEGIN_SRC shell :export no
 #!/bin/bash
 
-pdb_check=$(git grep -i ';Tracer()()\|ipbd.set_trace()\|petuch' -- '*.py')
+pdb_check=$(git grep -i ';Tracer()()\|.set_trace()\|petuch' -- '*.py')
 
 if [ ${#pdb_check} -gt 0 ]
 then
@@ -23,6 +25,12 @@ else
 fi
 #+end_src
 
+#+name: 
+#+begin_src shell :noweb yes :export results
+  echo "print('подопытный файл')\nfrom IPython.core.debugger import Tracer; Tracer()()\n" > rabb.py
+
+  <<Проверка на наличие нежелательного\временного кода>>
+#+end_src
 Тестирование джанго-проектов
 #+NAME: commit_after_tests
 #+begin_src shell
@@ -39,3 +47,9 @@ fi
 
 exit 0
 #+end_src
+* Интерактивная сборка
+  В блок кода ниже вставить имена чанков в noweb-синтаксисе и
+  выполнить ~org-babel-tanle~ (по-умолчанию ~C-c C-v t~)
+  #+BEGIN_SRC shell :tanle pre-commit
+    <<check_bps>>
+  #+END_SRC
