@@ -7,52 +7,91 @@
 #+LaTeX_HEADER:\usepackage[utf-8]{inputrec}
 
 Хуки, облегчающие трудовыебудни.
+#+name: l10n
+#+begin_src shell
+  GETTEXT='gettext "kr-githooks"'
+#+end_src
+
+#+RESULTS: l10n
+
 * Проверка на брейкпоинты и временный код.
   Помечать временный код -- хорошее решение. Помечайте временный
   код. Называйте специфично временные переменные, или добавляйте
   соответствующий комментарий. Я, например, для помечания временного кода
   использую слово ~Petuch~ в данных, комментариях или как имя
   временной переменной, используемой для отладки.
-  При использовании бряков у гнутого семейства дебаггеров, есть
-  необходимость проверять его наличие в коде перед коммитом. 
-  Хук отлавливает помеченный временный код и бряки гнутых дебаггеров и
-  прерывает коммит при их нахождении. 
+  Хук отлавливает помеченный временный код, забытые бряки гнутых
+  дебаггеров и прерывает коммит при их нахождении.
 #+NAME: Проверка на наличие нежелательного\временного кода
-#+BEGIN_SRC shell :export results
-pdb_check=$(git grep -i '; Tracer()()\|.set_trace()\|petuch' -- '*.py')
-
-if [ ${#pdb_check} -gt 0 ]
-then
-        echo -e "\e[31mCOMMIT REJECTED: commit contains code with break points. Please remove before commiting.\e[0m"
-        echo $pdb_check
-        exit 1
-else
-        echo -e "\e[36mCode contains no break points\e[0m"
-fi
+#+HEADER: :var REGXP_TC="; Tracer()()\\|.set_trace()\\|petuch" :var F_MASK="*.py"
+#+BEGIN_SRC shell :exports results :noweb no-export
+  
+  REJECT_MESSAGE=$($GETTEXT "COMMIT REJECTED: commit contains code with break points. Please remove before commiting.")
+  CLEAR_STATUS_MESSAGE=$($GETTEXT "Code contains no break points")
+  tc_check=$(git grep -i "$REGXP_TC" -- "$F_MASK")
+  if [ ${#tc_check} -gt 0 ]
+  then
+          echo -e $tc_check "\e[31m$REJECT_MESSAGE\e[0m"
+          exit 1
+  else
+          echo -e $tc_check "\e[36m$CLEAR_STATUS_MESSAGE\e[0m"
+  fi
 #+end_src
 
 #+RESULTS: Проверка на наличие нежелательного\временного кода
 : [36mCode contains no break points[0m
 
-Тестирование джанго-проектов
-#+NAME: commit_after_tests
-#+begin_src shell
-source .venv/bin/activate
-./manage.py test
-RESULT=$?
-if [ $RESULT -ne 0 ]
-then
-    echo -e "\e[31mCOMMIT REJECTED: Test's failed!\e[0m"
-    exit 1
-else
-    echo -e "\e[36mTest Passed\e[0m"
-fi
+* Контроль тестирования\сборки
+Перед коммитов выполняется команда на контроль качества. Прогон
+тестов, сборка.
 
-exit 0
+#+NAME: тесты перед коммитом
+#+header: :var QCONTROL_COMMAND="./manage.py test"
+#+begin_src shell :noweb no-export :exports no
+  
+  $QCONTROL_COMMAND
+  TEST_PASSED=$($GETTEXT "\e[36mAll Test Passed\e[0m")
+  TEST_FAILED=$($GETTEXT "\e[31mCOMMIT REJECTED: Test's failed!\e[0m")
+  RESULT=$?
+  if [ $RESULT -ne 0 ]
+  then
+      echo -e $TEST_FAILED
+      exit 1
+  else
+      echo -e $TEST_PASSED
+  fi
 #+end_src
+
+#+RESULTS: тесты перед коммитом
+
 * Интерактивная сборка
   В блок кода ниже вставить имена чанков в noweb-синтаксисе и
   выполнить ~org-babel-tanle~ (по-умолчанию ~C-c C-v t~)
-  #+BEGIN_SRC shell :tanle pre-commit
-    <<check_bps>>
+  #+NAME: django-exmpl
+  #+BEGIN_SRC shell :tangle pre-commit :noweb yes
+    #!/bin/bash
+    {{{l10n}}}
+    REGXP_TC="; Tracer()()\|.set_trace()\|petuch"
+    F_MASK="*.py"
+    QCONTROL_COMMAND="./manage.py test"
+    {{{Проверка на наличие нежелательного\временного кода}}}
+    {{{тесты перед коммитом}}}
   #+END_SRC
+
+* Установка из emacs
+  #+BEGIN_SRC shell :tangle no :var PROJECT="/home/roman/sources/goshabot"
+    REPO=$PROJECT/.git/hooks/
+    chmod +x pre-commit
+    mv pre-commit $REPO
+  #+END_SRC
+
+  #+RESULTS:
+  : /home/roman/sources/goshabot/.git/hooks/
+
+* File-local variables                                             :noexport:  
+  # Local Variables:
+  # org-babel-noweb-wrap-start: "{{{"
+  # org-babel-noweb-wrap-end: "}}}"
+  # org-confirm-babel-evaluate: nil
+  # org-export-allow-bind-keywords: t
+  # End:
