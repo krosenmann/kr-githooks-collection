@@ -1,6 +1,7 @@
 #+TITLE: Git Hooks Collection
 #+AUTHOR: Roman Zayrullin
 #+EMAIL: krosenmann@gmail.com
+#+EXPORT_FILE_NAME: README
 #+STARTUP: showall
 #+LaTeX_ClASS_OPTIONS: [11pt,a4paper,ubuntu]
 #+LaTeX_HEADER:\usepackage[scale=0.75]{geometry}
@@ -24,7 +25,7 @@
   дебаггеров и прерывает коммит при их нахождении.
 #+NAME: Проверка на наличие нежелательного\временного кода
 #+HEADER: :var REGXP_TC="; Tracer()()\\|.set_trace()\\|petuch" :var F_MASK="*.py"
-#+BEGIN_SRC shell :exports results :noweb no-export
+#+BEGIN_SRC shell :noweb no-export
   
   REJECT_MESSAGE=$($GETTEXT "COMMIT REJECTED: commit contains code with break points. Please remove before commiting.")
   CLEAR_STATUS_MESSAGE=$($GETTEXT "Code contains no break points")
@@ -47,7 +48,7 @@
 
 #+NAME: тесты перед коммитом
 #+header: :var QCONTROL_COMMAND="./manage.py test"
-#+begin_src shell :noweb no-export :exports no
+#+begin_src shell :noweb no-export 
   
   $QCONTROL_COMMAND
   TEST_PASSED=$($GETTEXT "\e[36mAll Test Passed\e[0m")
