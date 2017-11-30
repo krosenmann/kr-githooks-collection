@@ -1,17 +1,17 @@
 
 # Table of Contents
 
-1.  [Проверка на брейкпоинты и временный код.](#org7411be2)
-2.  [Контроль тестирования\\сборки](#org4f99b4a)
-3.  [Интерактивная сборка](#orgac0058a)
-4.  [Установка из emacs](#org9f2a7ee)
+1.  [Проверка на брейкпоинты и временный код.](#orgfb1dbfb)
+2.  [Контроль тестирования\\сборки](#orgf6132e6)
+3.  [Интерактивная сборка](#org2a68789)
+4.  [Установка из emacs](#org840d9e9)
 
 Хуки, облегчающие трудовыебудни.
 
     GETTEXT='gettext "kr-githooks"'
 
 
-<a id="org7411be2"></a>
+<a id="orgfb1dbfb"></a>
 
 # Проверка на брейкпоинты и временный код.
 
@@ -35,16 +35,16 @@
     fi
 
 
-<a id="org4f99b4a"></a>
+<a id="orgf6132e6"></a>
 
 # Контроль тестирования\\сборки
 
 Перед коммитов выполняется команда на контроль качества. Прогон
 тестов, сборка.
 
-    $QCONTROL_COMMAND
     TEST_PASSED=$($GETTEXT "\e[36mAll Test Passed\e[0m")
     TEST_FAILED=$($GETTEXT "\e[31mCOMMIT REJECTED: Test's failed!\e[0m")
+    $QCONTROL_COMMAND
     RESULT=$?
     if [ $RESULT -ne 0 ]
     then
@@ -55,7 +55,7 @@
     fi
 
 
-<a id="orgac0058a"></a>
+<a id="org2a68789"></a>
 
 # Интерактивная сборка
 
@@ -71,9 +71,11 @@
     {{{тесты перед коммитом}}}
 
 
-<a id="org9f2a7ee"></a>
+<a id="org840d9e9"></a>
 
 # Установка из emacs
+
+Переопределить PROJECT и выполнить
 
     REPO=$PROJECT/.git/hooks/
     chmod +x pre-commit
