@@ -10,11 +10,23 @@
 Шаблоны git-хуков, облегчающие трудовыебудни.
 
 #+name: l10n
-#+begin_src shell :export no
+#+begin_src shell :exports none
   GETTEXT='gettext "kr-githooks"'
 #+end_src
 
 #+RESULTS: l10n
+И немного поднимающие настроение. Чтобы завести своего гитотамагочи,
+установите ~cowsay~ и наслаждайтесь. А нет, так выпилите. Это ж
+шаблон, в конце концов.
+#+name: не разрешено
+#+BEGIN_SRC shell :var cmd="TEST" :exports none :tangle no :results code
+  echo "\"\e[31m$cmd\e[0m\" | cowsay -f dragon"
+#+END_SRC
+
+#+name: разрешено
+#+BEGIN_SRC shell :var cmd="TEST" :exports none :tangle no :results code
+echo "\"\e[36m$cmd\e[0m\" | cowsay"
+#+END_SRC
 
 * Проверка на брейкпоинты и временный код.
   Помечать временный код -- хорошее решение. Помечайте временный
@@ -27,16 +39,16 @@
 
 #+NAME: Проверка на наличие нежелательного\временного кода
 #+HEADER: :var REGXP_TC="; Tracer()()\\|.set_trace()\\|petuch" :var F_MASK="*.py"
-#+BEGIN_SRC shell :noweb no-export
+#+BEGIN_SRC shell :noweb yes
   REJECT_MESSAGE=$($GETTEXT "COMMIT REJECTED: Код содержит брейкпоинты или помеченные временные конструкции. Удалите их перед коммитом!")
   CLEAR_STATUS_MESSAGE=$($GETTEXT "Код не содержит бряков и временного кода")
   tc_check=$(git grep -i "$REGXP_TC" -- "$F_MASK")
   if [ ${#tc_check} -gt 0 ]
   then
-          echo -e $tc_check "\e[31m$REJECT_MESSAGE\e[0m" | cowsay -f dragon
+          echo -e $tc_check {{{не разрешено("$REJECT_MESSAGE")}}}
           exit 1
   else
-          echo -e $tc_check "\e[36m$CLEAR_STATUS_MESSAGE\e[0m" | cowsay
+          echo -e $tc_check {{{разрешено("$CLEAR_STATUS_MESSAGE")}}}
   fi
 #+end_src
 
@@ -107,7 +119,12 @@
    При работе с литературным исходником можно выполнить настройку и
    сборку непосредственно из самого Emacs. Подробнее -- в литературном
    исходнике. 
-** Бонус для емаксеров                                             :noexport:
+
+** TODO Понять, а можно ли этот файл использовать, как подключаемый.
+   Тогда сетап для хуков можно будет хранить в отдельном орг-файле, и
+   этот полиморфный уебок не будет себя вести, как школьница. 
+   Сетап в таблице, выполнение из кастомных файлов. Красота!
+** Бонус для емаксеров
    * Настройка
      1. Задать значения для переменных
      2. Вставить чанки интересующих хуков ~{{{<имя чанка>}}}~
@@ -118,7 +135,7 @@
      3. В чанке "установка" выполнить ~C-c C-c~
 
    #+NAME: установка
-   #+BEGIN_SRC shell :tangle no :var PROJECT="" :export no
+   #+BEGIN_SRC shell :tangle no :var PROJECT="" :exports none
      REPO=$PROJECT/.git/hooks/
      chmod +x pre-commit 
      chmod +x prepare-commit-msg
