@@ -7,7 +7,8 @@
 #+LaTeX_HEADER:\usepackage[scale=0.75]{geometry}
 #+LaTeX_HEADER:\usepackage[utf-8]{inputrec}
 
-Хуки, облегчающие трудовыебудни.
+Шаблоны git-хуков, облегчающие трудовыебудни.
+
 #+name: l10n
 #+begin_src shell :export no
   GETTEXT='gettext "kr-githooks"'
@@ -23,11 +24,12 @@
   временной переменной, используемой для отладки.
   Хук отлавливает помеченный временный код, забытые бряки гнутых
   дебаггеров и прерывает коммит при их нахождении.
+
 #+NAME: Проверка на наличие нежелательного\временного кода
 #+HEADER: :var REGXP_TC="; Tracer()()\\|.set_trace()\\|petuch" :var F_MASK="*.py"
 #+BEGIN_SRC shell :noweb no-export
-  REJECT_MESSAGE=$($GETTEXT "COMMIT REJECTED: commit contains code with break points. Please remove before commiting.")
-  CLEAR_STATUS_MESSAGE=$($GETTEXT "Code contains no break points")
+  REJECT_MESSAGE=$($GETTEXT "COMMIT REJECTED: Код содержит брейкпоинты или помеченные временные конструкции. Удалите их перед коммитом!")
+  CLEAR_STATUS_MESSAGE=$($GETTEXT "Код не содержит бряков и временного кода")
   tc_check=$(git grep -i "$REGXP_TC" -- "$F_MASK")
   if [ ${#tc_check} -gt 0 ]
   then
@@ -48,8 +50,14 @@
 #+NAME: тесты перед коммитом
 #+header: :var QCONTROL_COMMAND="./manage.py test"
 #+begin_src shell :noweb no-export 
-  TEST_PASSED=$($GETTEXT "\e[36mAll Test Passed\e[0m")
-  TEST_FAILED=$($GETTEXT "\e[31mCOMMIT REJECTED: Test's failed!\e[0m")
+  TEST_PASSED=$($GETTEXT "\e[36mТесты пройдены успешно\e[0m")
+  TEST_FAILED=$($GETTEXT "
+  \e[31mCOMMIT REJECTED: Тесты сломаны! 
+  Убедитесь, что программа работает корректно и повторите попытку.\e[0m
+  Если подозреваете, что в поломке виноват кто-то другой (или молодой вы), 
+  воспльзуйтесь командой\n
+  \tgit bisect
+  ")
   $QCONTROL_COMMAND
   RESULT=$?
   if [ $RESULT -ne 0 ]
@@ -63,7 +71,7 @@
 
 #+RESULTS: тесты перед коммитом
 
-** Интерактивная сборка
+** Сборка
   
    В блок кода ниже вставить имена чанков в noweb-синтаксисе и
    выполнить ~org-babel-tangle~ (по-умолчанию ~C-c C-v t~)
