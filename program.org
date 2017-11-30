@@ -85,7 +85,7 @@
   Всякие ЖИРО-образные системы любят, чтобы в сообщении коммита
   писались имена задач, чтобы их можно было вставлять в историю
   задач. И чтобы еще и ветки так же назывались. 
-  То есть в этом случае сообщение коммита начинается с имени ветки. 
+  По жиротрадиции, это что-то вроде FOO-1337.
   #+name: Имя ветки в начале сообщения коммита
   #+begin_src shell :noweb no-export :tangle prepare-commit-msg
     #!/bin/bash 
@@ -95,17 +95,30 @@
 
   #+RESULTS: Имя ветки в начале сообщения коммита
 
-* Установка из emacs
-  Переопределить PROJECT и выполнить
-  #+BEGIN_SRC shell :tangle no :var PROJECT="" :export no
-    REPO=$PROJECT/.git/hooks/
-    chmod +x pre-commit 
-    chmod +x prepare-commit-msg
-    cp pre-commit -t $REPO
-    cp prepare-commit-msg $REPO
-  #+END_SRC
+* Настройка и добавление хуков в репы
+   При работе с литературным исходником можно выполнить настройку и
+   сборку непосредственно из самого Emacs. Подробнее -- в литературном
+   исходнике. 
+** Бонус для емаксеров                                             :noexport:
+   * Настройка
+     1. Задать значения для переменных
+     2. Вставить чанки интересующих хуков ~{{{<имя чанка>}}}~
+     3. Выполнить ~C-c C-v t~
+   * Установка
+     1. Перейти в чанк "установка"
+     2. В хедере чанка, в переменной PROJECT, задать путь до проекта
+     3. В чанке "установка" выполнить ~C-c C-c~
 
-  #+RESULTS:
+   #+NAME: установка
+   #+BEGIN_SRC shell :tangle no :var PROJECT="" :export no
+     REPO=$PROJECT/.git/hooks/
+     chmod +x pre-commit 
+     chmod +x prepare-commit-msg
+     cp pre-commit -t $REPO
+     cp prepare-commit-msg $REPO
+   #+END_SRC
+
+   #+RESULTS:
 
 * File-local variables                                             :noexport:  
   # Local Variables:
