@@ -48,9 +48,9 @@
 #+NAME: тесты перед коммитом
 #+header: :var QCONTROL_COMMAND="./manage.py test"
 #+begin_src shell :noweb no-export 
-  $QCONTROL_COMMAND
   TEST_PASSED=$($GETTEXT "\e[36mAll Test Passed\e[0m")
   TEST_FAILED=$($GETTEXT "\e[31mCOMMIT REJECTED: Test's failed!\e[0m")
+  $QCONTROL_COMMAND
   RESULT=$?
   if [ $RESULT -ne 0 ]
   then
@@ -81,14 +81,14 @@
   #+RESULTS: django-exmpl
 
 * Установка из emacs
-  #+BEGIN_SRC shell :tangle no :var PROJECT="/home/roman/sources/goshabot" :export no
+  Переопределить PROJECT и выполнить
+  #+BEGIN_SRC shell :tangle no :var PROJECT="/home/zayrullin/kharon/" :export no
     REPO=$PROJECT/.git/hooks/
     chmod +x pre-commit
     mv pre-commit $REPO
   #+END_SRC
 
   #+RESULTS:
-  : /home/roman/sources/goshabot/.git/hooks/
 
 * File-local variables                                             :noexport:  
   # Local Variables:
