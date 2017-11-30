@@ -9,7 +9,7 @@
 
 Хуки, облегчающие трудовыебудни.
 #+name: l10n
-#+begin_src shell
+#+begin_src shell :export no
   GETTEXT='gettext "kr-githooks"'
 #+end_src
 
@@ -26,7 +26,6 @@
 #+NAME: Проверка на наличие нежелательного\временного кода
 #+HEADER: :var REGXP_TC="; Tracer()()\\|.set_trace()\\|petuch" :var F_MASK="*.py"
 #+BEGIN_SRC shell :noweb no-export
-  
   REJECT_MESSAGE=$($GETTEXT "COMMIT REJECTED: commit contains code with break points. Please remove before commiting.")
   CLEAR_STATUS_MESSAGE=$($GETTEXT "Code contains no break points")
   tc_check=$(git grep -i "$REGXP_TC" -- "$F_MASK")
@@ -49,7 +48,6 @@
 #+NAME: тесты перед коммитом
 #+header: :var QCONTROL_COMMAND="./manage.py test"
 #+begin_src shell :noweb no-export 
-  
   $QCONTROL_COMMAND
   TEST_PASSED=$($GETTEXT "\e[36mAll Test Passed\e[0m")
   TEST_FAILED=$($GETTEXT "\e[31mCOMMIT REJECTED: Test's failed!\e[0m")
@@ -66,10 +64,11 @@
 #+RESULTS: тесты перед коммитом
 
 * Интерактивная сборка
+  
   В блок кода ниже вставить имена чанков в noweb-синтаксисе и
-  выполнить ~org-babel-tanle~ (по-умолчанию ~C-c C-v t~)
+  выполнить ~org-babel-tangle~ (по-умолчанию ~C-c C-v t~)
   #+NAME: django-exmpl
-  #+BEGIN_SRC shell :tangle pre-commit :noweb yes
+  #+BEGIN_SRC shell :tangle pre-commit :noweb no-export
     #!/bin/bash
     {{{l10n}}}
     REGXP_TC="; Tracer()()\|.set_trace()\|petuch"
@@ -79,8 +78,10 @@
     {{{тесты перед коммитом}}}
   #+END_SRC
 
+  #+RESULTS: django-exmpl
+
 * Установка из emacs
-  #+BEGIN_SRC shell :tangle no :var PROJECT="/home/roman/sources/goshabot"
+  #+BEGIN_SRC shell :tangle no :var PROJECT="/home/roman/sources/goshabot" :export no
     REPO=$PROJECT/.git/hooks/
     chmod +x pre-commit
     mv pre-commit $REPO
