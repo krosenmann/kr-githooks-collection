@@ -1,17 +1,18 @@
 
 # Table of Contents
 
-1.  [Проверка на брейкпоинты и временный код.](#orgfb1dbfb)
-2.  [Контроль тестирования\\сборки](#orgf6132e6)
-3.  [Интерактивная сборка](#org2a68789)
-4.  [Установка из emacs](#org840d9e9)
+1.  [Проверка на брейкпоинты и временный код.](#org1f49977)
+2.  [Контроль тестирования\\сборки](#orga0120be)
+    1.  [Интерактивная сборка](#org00306ff)
+3.  [Вставка имени ветки в сообщение коммита](#orga0c50e0)
+4.  [Установка из emacs](#org9e1e412)
 
 Хуки, облегчающие трудовыебудни.
 
     GETTEXT='gettext "kr-githooks"'
 
 
-<a id="orgfb1dbfb"></a>
+<a id="org1f49977"></a>
 
 # Проверка на брейкпоинты и временный код.
 
@@ -28,14 +29,14 @@
     tc_check=$(git grep -i "$REGXP_TC" -- "$F_MASK")
     if [ ${#tc_check} -gt 0 ]
     then
-            echo -e $tc_check "\e[31m$REJECT_MESSAGE\e[0m"
+            echo -e $tc_check "\e[31m$REJECT_MESSAGE\e[0m" | cowsay -f dragon
             exit 1
     else
-            echo -e $tc_check "\e[36m$CLEAR_STATUS_MESSAGE\e[0m"
+            echo -e $tc_check "\e[36m$CLEAR_STATUS_MESSAGE\e[0m" | cowsay
     fi
 
 
-<a id="orgf6132e6"></a>
+<a id="orga0120be"></a>
 
 # Контроль тестирования\\сборки
 
@@ -48,16 +49,16 @@
     RESULT=$?
     if [ $RESULT -ne 0 ]
     then
-        echo -e $TEST_FAILED
+        echo -e $TEST_FAILED | cowsay -f dragon
         exit 1
     else
-        echo -e $TEST_PASSED
+        echo -e $TEST_PASSED | cowsay 
     fi
 
 
-<a id="org2a68789"></a>
+<a id="org00306ff"></a>
 
-# Интерактивная сборка
+## Интерактивная сборка
 
 В блок кода ниже вставить имена чанков в noweb-синтаксисе и
 выполнить `org-babel-tangle` (по-умолчанию `C-c C-v t`)
@@ -69,15 +70,32 @@
     QCONTROL_COMMAND="./manage.py test"
     {{{Проверка на наличие нежелательного\временного кода}}}
     {{{тесты перед коммитом}}}
+    exit 0
 
 
-<a id="org840d9e9"></a>
+<a id="orga0c50e0"></a>
+
+# Вставка имени ветки в сообщение коммита
+
+Всякие ЖИРО-образные системы любят, чтобы в сообщении коммита
+писались имена задач, чтобы их можно было вставлять в историю
+задач. И чтобы еще и ветки так же назывались. 
+То есть в этом случае сообщение коммита начинается с имени ветки. 
+
+    #!/bin/bash 
+    BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD | grep "[[:upper:]].*-[[:digit:]].*")
+    echo "$BRANCH_NAME" >> $1
+
+
+<a id="org9e1e412"></a>
 
 # Установка из emacs
 
 Переопределить PROJECT и выполнить
 
     REPO=$PROJECT/.git/hooks/
-    chmod +x pre-commit
-    mv pre-commit $REPO
+    chmod +x pre-commit 
+    chmod +x prepare-commit-msg
+    cp pre-commit -t $REPO
+    cp prepare-commit-msg $REPO
 
