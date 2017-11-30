@@ -124,6 +124,39 @@ echo "\"\e[36m$cmd\e[0m\" | cowsay"
    Тогда сетап для хуков можно будет хранить в отдельном орг-файле, и
    этот полиморфный уебок не будет себя вести, как школьница. 
    Сетап в таблице, выполнение из кастомных файлов. Красота!
+   А хули мне, собственно, стоит?
+   #+BEGIN_SRC org :tangle example.org :exports code
+     ,#+TITLE: Пример гит-хуков для проектов
+     ,#+AUTHOR: Roman Zayrullin
+     ,#+EMAIL: krosenmann@gmail.com
+     ,#+STARTUP: showall
+     ,#+INCLUDE: "./programm.org"
+
+     ,* На стройку!
+     ,#+tblname: awesome_django_setup
+     | Имя параметра    | значение                                       |
+     |------------------+------------------------------------------------|
+     | REGXP_TC         | "; Tracer()()\\vert.set_trace()\\vert\ petuch" |
+     | F_MASK           | "*.py"                                         |
+     | QCONTROL_COMMAND | "./manage.py test"                             |
+     | PROJECT          | "/home/roman/sources/learning-some-shit/"      |
+     |------------------+------------------------------------------------|
+
+     Возможное решение -- повернуть таблицу так, чтобы на одной строке
+     находились параметры одного проекта, тогда можно будет применить
+     табличную функцию, которая совершит весь нехитрый сетап!
+
+     ,#+begin_src python :var keys=awesome_django_setup :results output table :colnames no
+     print(keys)
+     ,#+end_src
+
+     ,#+RESULTS:
+     | Имя параметра    | значение                                 |
+     | REGXP_TC         | ; Tracer()()\vert.set_trace()\vertpetuch |
+     | F_MASK           | *.py                                     |
+     | QCONTROL_COMMAND | ./manage.py test                         |
+     | PROJECT          | /home/roman/sources/learning-some-shit/  |
+   #+END_SRC
 ** Бонус для емаксеров
    * Настройка
      1. Задать значения для переменных
