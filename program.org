@@ -20,7 +20,7 @@
 шаблон, в конце концов.
 #+name: не разрешено
 #+BEGIN_SRC shell :var cmd="TEST" :exports none :tangle no :results code
-  echo "\"\e[31m$cmd\e[0m\" | cowsay -f dragon"
+  echo "\"\e[31m$cmd\e[0m\" | cowsay -f bounty"
 #+END_SRC
 
 #+name: разрешено
@@ -40,7 +40,7 @@ echo "\"\e[36m$cmd\e[0m\" | cowsay"
 #+NAME: Проверка на наличие нежелательного\временного кода
 #+HEADER: :var REGXP_TC="; Tracer()()\\|.set_trace()\\|petuch" :var F_MASK="*.py"
 #+BEGIN_SRC shell :noweb yes
-  REJECT_MESSAGE=$($GETTEXT "COMMIT REJECTED: Код содержит брейкпоинты или помеченные временные конструкции. Удалите их перед коммитом!")
+  REJECT_MESSAGE=$($GETTEXT "Кажется, тут сломанная ветка! Код содержит брейкпоинты или помеченные временные конструкции. Удалите их перед коммитом!")
   CLEAR_STATUS_MESSAGE=$($GETTEXT "Код не содержит бряков и временного кода")
   tc_check=$(git grep -i "$REGXP_TC" -- "$F_MASK")
   if [ ${#tc_check} -gt 0 ]
@@ -64,17 +64,17 @@ echo "\"\e[36m$cmd\e[0m\" | cowsay"
 #+begin_src shell :noweb no-export 
   TEST_PASSED=$($GETTEXT "\e[36mТесты пройдены успешно\e[0m")
   TEST_FAILED=$($GETTEXT "
-  \e[31mCOMMIT REJECTED: Тесты сломаны! 
+  \e[31mCOMMIT REJECTED: Кажется, тут сломанная ветка! 
   Убедитесь, что программа работает корректно и повторите попытку.\e[0m
   Если подозреваете, что в поломке виноват кто-то другой (или молодой вы), 
   воспльзуйтесь командой\n
-  \tgit bisect
+  \t\e[1mgit bisect\e[0m
   ")
   $QCONTROL_COMMAND
   RESULT=$?
   if [ $RESULT -ne 0 ]
   then
-      echo -e $TEST_FAILED | cowsay -f dragon
+      echo -e $TEST_FAILED | cowsay -f bounty
       exit 1
   else
       echo -e $TEST_PASSED | cowsay 
@@ -116,46 +116,57 @@ echo "\"\e[36m$cmd\e[0m\" | cowsay"
   #+RESULTS: Имя ветки в начале сообщения коммита
 
 * Настройка и добавление хуков в репы
-   При работе с литературным исходником можно выполнить настройку и
-   сборку непосредственно из самого Emacs. Подробнее -- в литературном
-   исходнике. 
-
-** TODO Понять, а можно ли этот файл использовать, как подключаемый.
-   Тогда сетап для хуков можно будет хранить в отдельном орг-файле, и
-   этот полиморфный уебок не будет себя вести, как школьница. 
-   Сетап в таблице, выполнение из кастомных файлов. Красота!
-   А хули мне, собственно, стоит?
+  
+  Один из вариантов -- проекто-специфичные вещи описать в отдельном
+  орг-файле. Для того, чтобы чанки из этого сурца были доступны для
+  извлечения в проектном орг-файле, выполните ~M-x
+  org-babel-lob-ingest~ и укажите путь до файла program.org
+  
    #+BEGIN_SRC org :tangle example.org :exports code
-     ,#+TITLE: Пример гит-хуков для проектов
+     ,#+TITLE: Пример настройки проекта
      ,#+AUTHOR: Roman Zayrullin
      ,#+EMAIL: krosenmann@gmail.com
      ,#+STARTUP: showall
-     ,#+INCLUDE: "./programm.org"
+
 
      ,* На стройку!
-     ,#+tblname: awesome_django_setup
-     | Имя параметра    | значение                                       |
-     |------------------+------------------------------------------------|
-     | REGXP_TC         | "; Tracer()()\\vert.set_trace()\\vert\ petuch" |
-     | F_MASK           | "*.py"                                         |
-     | QCONTROL_COMMAND | "./manage.py test"                             |
-     | PROJECT          | "/home/roman/sources/learning-some-shit/"      |
-     |------------------+------------------------------------------------|
+     Проект настраивается заполнением таблицы. Каждая переменная необходима
+     либо для работы и установки, а так же служит напоминанием, какой набор
+     хуков в какой проект установлен. 
+     ,#+TBLNAME: setup
+     | Имя параметра    | значение                                    | Описание                                                   |
+     |------------------+---------------------------------------------+------------------------------------------------------------|
+     | REGXP_TC         | "; Tracer()()"                              | Регулярка с нежелательными последовательностями            |
+     | F_MASK           | "*.py"                                      | Маска файлов, по которым ведется поиск последовательностей |
+     | QCONTROL_COMMAND | "./manage.py test"                          | Контрольная команда (тесты, сборка, етс.)                  |
+     | PROJECT          | "/home/roman/sources/django-business-logic" | Путь до проекта                                            |
+     |------------------+---------------------------------------------+------------------------------------------------------------|
 
-     Возможное решение -- повернуть таблицу так, чтобы на одной строке
-     находились параметры одного проекта, тогда можно будет применить
-     табличную функцию, которая совершит весь нехитрый сетап!
+     ,#+NAME: create-precommit
+     ,#+header: :shebang #!/bin/bash :var F_MASK=setup[3, 1] :var QCONTROL_COMMAND=setup[4, 1] :var REGEXP_TC=setup[2, 1]
+     ,#+BEGIN_SRC shell :noweb yes :tangle pre-commit :exports none :results output
+       {{{l10n}}}
+       {{{Проверка на наличие нежелательного\временного кода}}}
+       {{{тесты перед коммитом}}}
+     ,#+END_SRC
 
-     ,#+begin_src python :var keys=awesome_django_setup :results output table :colnames no
-     print(keys)
-     ,#+end_src
+     ,#+RESULTS: create-precommit
+
+     После того, как все необходимые параметры заданы:
+     1. ~C-c C-v t~ - для извлечения чанков с хуками
+     2. ~C-c C-c~ на строке CALL ниже
+
+     ,#+CALL: установка(PROJECT=setup[5, 1])
 
      ,#+RESULTS:
-     | Имя параметра    | значение                                 |
-     | REGXP_TC         | ; Tracer()()\vert.set_trace()\vertpetuch |
-     | F_MASK           | *.py                                     |
-     | QCONTROL_COMMAND | ./manage.py test                         |
-     | PROJECT          | /home/roman/sources/learning-some-shit/  |
+
+     ,* File-local variables                                             :noexport:  
+       # Local Variables:
+       # org-babel-noweb-wrap-start: "{{{"
+       # org-babel-noweb-wrap-end: "}}}"
+       # org-confirm-babel-evaluate: nil
+       # org-export-allow-bind-keywords: t
+       # End:
    #+END_SRC
 ** Бонус для емаксеров
    * Настройка
@@ -176,10 +187,13 @@ echo "\"\e[36m$cmd\e[0m\" | cowsay"
      cp prepare-commit-msg $REPO
    #+END_SRC
 
-   #+RESULTS:
+   #+RESULTS: установка
+
 * Дополнение
   А если станет совсем печально и скучно, то на фейлы можно поставить
-  вот этого парня с фразой "Кажется, тут сломанная ветка"
+  вот этого парня. Для установки извлеченный cow-файл поместите в
+  =/usr/share/cowsay/cows=
+
   #+name: gondar say
   #+BEGIN_SRC artist :exports none :tangle bounty.cow
     ## Gondar
