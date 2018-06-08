@@ -97,18 +97,19 @@ echo "\"\e[36m$cmd\e[0m\" | cowsay"
      F_MASK="*.py"
      QCONTROL_COMMAND="./manage.py test"
      {{{Проверка на наличие нежелательного\временного кода}}}
-     {{{тесты}}}
      exit 0
    #+END_SRC
 
    #+NAME: prepush-django-exmpl
    #+BEGIN_SRC shell :tangle pre-push :noweb no-export :shebang #!/bin/bash
      {{{l10n}}}
-     commands=("./manage.py test" "docker build -f Dockerfile .")
+     commands=("./manage.py test" "docker build --rm -t autocreated-by-git -f Dockerfile . ")
      for QCONTROL_COMMAND in "${commands[@]}"
      do
          {{{тесты}}}
      done
+     # Очистка контейнера (кандидат на пост-пуш хук)
+     docker rmi autocreated-by-git
    #+END_SRC
 
 * Вставка имени ветки в сообщение коммита
